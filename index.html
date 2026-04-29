@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SnapFind Pro - AI Image Search</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-camera"></i> SnapFind Pro</h1>
+      <p>Upload an image, find matching products instantly</p>
+    </header>
+
+    <main>
+      <!-- Upload Section -->
+      <section class="upload-section">
+        <div class="upload-area" id="uploadArea">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>Drag & drop your image here or click to browse</p>
+          <input type="file" id="imageInput" accept="image/*" hidden>
+        </div>
+        <div class="preview-container" id="previewContainer" style="display: none;">
+          <img id="previewImage" alt="Preview">
+          <button class="search-btn" id="searchBtn">
+            <i class="fas fa-search"></i> Find Products
+          </button>
+        </div>
+      </section>
+
+      <!-- Loading Spinner -->
+      <div class="loading" id="loading" style="display: none;">
+        <div class="spinner"></div>
+        <p>Analyzing image with AI...</p>
+      </div>
+
+      <!-- Results Section -->
+      <section class="results-section" id="resultsSection" style="display: none;">
+        <div class="detected-tags">
+          <h3><i class="fas fa-tags"></i> Detected Labels</h3>
+          <div class="tags-grid" id="tagsGrid"></div>
+        </div>
+        
+        <div class="products-grid" id="productsGrid">
+          <div class="no-results" id="noResults" style="display: none;">
+            <i class="fas fa-search"></i>
+            <h3>No products found</h3>
+            <p>Try uploading a different image</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
