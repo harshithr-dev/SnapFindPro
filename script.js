@@ -67,6 +67,7 @@ const resultsGrid = document.getElementById('resultsGrid');
 const noResults = document.getElementById('noResults');
 
 let selectedFile = null;
+let imageBase64 = null; // Store base64 for sending to backend
 
 // ===== Event Listeners =====
 uploadArea.addEventListener('click', () => fileInput.click());
@@ -114,7 +115,9 @@ function handleFile(file) {
   
   const reader = new FileReader();
   reader.onload = (e) => {
-    imagePreview.src = e.target.result;
+    const result = e.target.result;
+    imageBase64 = result; // Store full data URL
+    imagePreview.src = result;
     imagePreview.classList.remove('hidden');
     uploadPlaceholder.classList.add('hidden');
     removeImageBtn.classList.remove('hidden');
@@ -125,6 +128,7 @@ function handleFile(file) {
 
 function resetUpload() {
   selectedFile = null;
+  imageBase64 = null;
   fileInput.value = '';
   imagePreview.src = '';
   imagePreview.classList.add('hidden');
@@ -140,7 +144,7 @@ function resetUpload() {
 
 // ===== Analyze Image =====
 async function analyzeImage() {
-  if (!selectedFile) return;
+  if (!imageBase64) return;
 
   // Show loading
   loadingSection.classList.remove('hidden');
@@ -150,16 +154,16 @@ async function analyzeImage() {
   searchBtn.disabled = true;
 
   try {
-    const formData = new FormData();
-    formData.append('image', selectedFile);
-
+    // Send base64 as JSON — no multipart parsing needed
     const response = await fetch('/api/analyze', {
       method: 'POST',
-      body: formData
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: imageBase64 })
     });
 
     if (!response.ok) {
-      throw new Error('Analysis failed');
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Server error: ${response.status}`);
     }
 
     const data = await response.json();
@@ -174,7 +178,7 @@ async function analyzeImage() {
 
   } catch (error) {
     console.error('Error:', error);
-    alert('Something went wrong. Please try again.');
+    alert('Something went wrong: ' + error.message);
   } finally {
     loadingSection.classList.add('hidden');
     searchBtn.disabled = false;
