@@ -1,7 +1,7 @@
-// Google Vision API - Image Analysis
+// Groq Vision API - Image Analysis
 // Vercel Serverless Function
 
-const API_KEY = "AIzaSyC9ql8egyqLWI4xyYO6DpjAlSOy1__MFVE";
+const GROQ_API_KEY = "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";
 
 export default async function handler(req, res) {
   // Enable CORS
@@ -19,50 +19,74 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Parse JSON body (Vercel auto-parses JSON when Content-Type is application/json)
-    const body = req.body || {};
+    // Parse JSON body
+    let body = {};
+    
+    if (req.body && typeof req.body === 'object') {
+      body = req.body;
+    } else if (req.body && typeof req.body === 'string') {
+      try {
+        body = JSON.parse(req.body);
+      } catch (e) {
+        return res.status(400).json({ error: 'Invalid JSON body' });
+      }
+    }
+
     const imageDataUrl = body.image;
 
     if (!imageDataUrl || typeof imageDataUrl !== 'string') {
       return res.status(400).json({ error: 'No image provided. Expected base64 data URL.' });
     }
 
-    // Extract base64 content from data URL (remove "data:image/...;base64," prefix)
-    const base64Content = imageDataUrl.split(',')[1];
+    // Call Groq Vision API
+    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${GROQ_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: "meta-llama/llama-4-scout-17b-16e-instruct",
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "List the main objects and items visible in this image. Return ONLY a comma-separated list of keywords (e.g., shoe, sneaker, red, nike). No sentences, no explanations. Just keywords."
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: imageDataUrl
+                }
+              }
+            ]
+          }
+        ],
+        temperature: 0.3,
+        max_completion_tokens: 200
+      })
+    });
 
-    if (!base64Content) {
-      return res.status(400).json({ error: 'Invalid image format. Expected base64 data URL.' });
-    }
+    const groqData = await groqResponse.json();
 
-    // Call Google Vision API
-    const visionResponse = await fetch(
-      `https://vision.googleapis.com/v1/images:annotate?key=${API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          requests: [{
-            image: { content: base64Content },
-            features: [{ type: 'LABEL_DETECTION', maxResults: 10 }]
-          }]
-        })
-      }
-    );
-
-    const visionData = await visionResponse.json();
-
-    if (visionData.error) {
-      console.error('Vision API error:', visionData.error);
+    if (!groqResponse.ok) {
+      console.error('Groq API error:', groqData);
       return res.status(500).json({ 
-        error: 'Vision API error', 
-        details: visionData.error.message 
+        error: 'Groq API error', 
+        details: groqData.error?.message || 'Unknown error'
       });
     }
 
-    // Extract label descriptions
-    const labels = visionData.responses[0]?.labelAnnotations?.map(
-      annotation => annotation.description
-    ) || [];
+    // Parse the response text into an array of labels
+    const rawText = groqData.choices[0]?.message?.content || '';
+    
+    // Split by commas and clean up
+    const labels = rawText
+      .split(/[,\n]/) // Split by comma or newline
+      .map(label => label.trim().toLowerCase())
+      .filter(label => label.length > 0 && label.length < 50); // Remove empty and too-long labels
 
     return res.status(200).json({ labels });
 
