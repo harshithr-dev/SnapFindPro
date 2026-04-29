@@ -1,6 +1,12 @@
 {
   "name": "snapfind-pro",
   "version": "1.0.0",
-  "type": "module",
-  "dependencies": {}
+  "description": "AI-powered image-to-product search app",
+  "main": "api/analyze.js",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "keywords": ["image-search", "ai", "vision-api", "vercel"],
+  "author": "",
+  "license": "MIT"
 }
