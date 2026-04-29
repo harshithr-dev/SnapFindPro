@@ -1,62 +1,86 @@
-const fetch = require('node-fetch');
+// /api/analyze.js - VERCEL 2024 COMPATIBLE
+import { IncomingForm } from 'formidable';
+import fs from 'fs';
+import fetch from 'node-fetch';
 
-const API_KEY = "AIzaSyC9ql8egyqLWI4xyYO6DpjAlSOy1__MFVE"; // ← YOUR KEY HERE
+const API_KEY = "AIzaSyC9ql8egyqLWI4xyYO6DpjAlSOy1__MFVE"; // ← YOUR KEY HERE!
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    res.status(405).json({ error: 'Only POST allowed' });
+    return;
   }
 
   try {
-    // Fix: Vercel now uses req.body directly for FormData
-    const contentType = req.headers['content-type'];
+    // Parse form data with formidable (Vercel compatible)
+    const form = new IncomingForm();
     
-    if (!contentType || !contentType.includes('multipart/form-data')) {
-      return res.status(400).json({ error: 'No image data' });
-    }
+    form.parse(req, async (err, fields, files) => {
+      if (err) {
+        console.error('Form parse error:', err);
+        res.status(400).json({ error: 'Invalid form data' });
+        return;
+      }
 
-    // Parse multipart form data manually (Vercel fix)
-    const buffer = req.body;
-    
-    // Simple base64 conversion from buffer
-    const base64Image = buffer.toString('base64');
-    
-    if (!base64Image || base64Image.length < 100) {
-      return res.status(400).json({ error: 'Invalid image data' });
-    }
+      const file = Array.isArray(files.image) ? files.image[0] : files.image;
+      
+      if (!file) {
+        res.status(400).json({ error: 'No image file found' });
+        return;
+      }
 
-    // Google Vision API
-    const visionUrl = `https://vision.googleapis.com/v1/images:annotate?key=${API_KEY}`;
-    
-    const visionRequest = {
-      requests: [{
-        image: { content: base64Image },
-        features: [{ type: 'LABEL_DETECTION', maxResults: 10 }]
-      }]
-    };
+      // Read image file
+      const imageBuffer = fs.readFileSync(file.filepath);
+      const base64Image = imageBuffer.toString('base64');
+      
+      if (!base64Image || base64Image.length < 1000) {
+        res.status(400).json({ error: 'Invalid image' });
+        return;
+      }
 
-    const visionResponse = await fetch(visionUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(visionRequest),
+      // Google Vision API Call
+      const visionUrl = `https://vision.googleapis.com/v1/images:annotate?key=${API_KEY}`;
+      
+      const visionRequest = {
+        requests: [{
+          image: { content: base64Image },
+          features: [{ type: 'LABEL_DETECTION', maxResults: 10 }]
+        }]
+      };
+
+      try {
+        const visionResponse = await fetch(visionUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(visionRequest),
+        });
+
+        const visionData = await visionResponse.json();
+
+        if (visionData.error) {
+          console.error('Google Vision Error:', visionData.error);
+          res.status(500).json({ 
+            error: 'Vision API failed', 
+            details: visionData.error.message 
+          });
+          return;
+        }
+
+        const labels = visionData.responses[0]?.labelAnnotations?.map(item => 
+          item.description.toLowerCase().replace(/[^\w\s]/g, '')
+        ) || [];
+
+        console.log('✅ Labels detected:', labels);
+        res.status(200).json({ labels });
+
+      } catch (visionError) {
+        console.error('Vision fetch error:', visionError);
+        res.status(500).json({ error: 'Vision API unreachable' });
+      }
     });
 
-    const visionData = await visionResponse.json();
-
-    if (visionData.error) {
-      console.error('Vision API Error:', visionData.error);
-      return res.status(500).json({ 
-        error: 'Vision API failed', 
-        details: visionData.error.message 
-      });
-    }
-
-    const labels = visionData.responses[0]?.labelAnnotations?.map(item => item.description.toLowerCase()) || [];
-
-    return res.status(200).json({ labels });
-
   } catch (error) {
-    console.error('Analyze error:', error);
-    return res.status(500).json({ error: 'Server error', details: error.message });
+    console.error('Handler error:', error);
+    res.status(500).json({ error: 'Server error', details: error.message });
   }
 }
