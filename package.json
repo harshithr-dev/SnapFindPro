@@ -1,12 +1,7 @@
 {
   "name": "snapfind-pro",
   "version": "1.0.0",
-  "description": "AI-powered image-to-product search app using Groq",
-  "main": "api/analyze.js",
-  "scripts": {
-    "dev": "vercel dev"
-  },
-  "keywords": ["image-search", "ai", "groq", "vision", "vercel"],
-  "author": "",
-  "license": "MIT"
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
 }
