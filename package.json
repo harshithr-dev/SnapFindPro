@@ -2,12 +2,5 @@
   "name": "snapfind-pro",
   "version": "1.0.0",
   "type": "module",
-  "description": "AI-powered image-to-product search",
-  "scripts": {
-    "dev": "vercel dev"
-  },
-  "dependencies": {
-    "node-fetch": "^2.7.0",
-    "formidable": "^3.5.1"
-  }
+  "dependencies": {}
 }
