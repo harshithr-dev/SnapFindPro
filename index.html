@@ -3,109 +3,81 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SnapFind Pro - AI Visual Search</title>
+  <title>SnapFind Pro — AI Image Search</title>
   <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="app">
+  <div class="container">
     <!-- Header -->
     <header class="header">
-      <div class="header-content">
-        <div class="logo">
-          <i class="material-icons">visibility</i>
-          <span>SnapFind Pro</span>
-        </div>
-        <div class="header-actions">
-          <button class="history-btn" id="historyBtn">
-            <i class="material-icons">history</i>
-            <span>History</span>
-          </button>
-        </div>
+      <div class="logo">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+        <h1>SnapFind Pro</h1>
       </div>
+      <p class="subtitle">Upload an image. Find matching products instantly.</p>
     </header>
 
-    <!-- Main Content -->
-    <main class="main">
-      <!-- Upload Section -->
-      <section class="upload-section active" id="uploadSection">
-        <div class="upload-card">
-          <div class="upload-area" id="uploadArea">
-            <i class="material-icons">cloud_upload</i>
-            <div class="upload-text">
-              <h2>Search with your image</h2>
-              <p>Drag & drop or click to upload</p>
-            </div>
-            <input type="file" id="imageInput" accept="image/*" hidden>
-          </div>
-          
-          <div class="preview-container" id="previewContainer" style="display: none;">
-            <img id="previewImage" alt="Preview">
-            <div class="preview-actions">
-              <button class="search-btn primary" id="searchBtn">
-                <i class="material-icons">search</i>
-                <span>Find Products</span>
-              </button>
-              <button class="clear-btn" id="clearBtn">
-                <i class="material-icons">close</i>
-              </button>
-            </div>
-          </div>
+    <!-- Upload Section -->
+    <section class="upload-section">
+      <div class="upload-area" id="uploadArea">
+        <input type="file" id="fileInput" accept="image/*" hidden>
+        <div class="upload-placeholder" id="uploadPlaceholder">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <p>Drag & drop an image or <span class="highlight">click to browse</span></p>
+          <span class="file-types">JPG, PNG, GIF up to 5MB</span>
         </div>
-      </section>
+        <img id="imagePreview" class="image-preview hidden" alt="Preview">
+        <button id="removeImage" class="remove-image hidden" title="Remove image">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <button id="searchBtn" class="search-btn" disabled>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        Find Products
+      </button>
+    </section>
 
-      <!-- Loading -->
-      <section class="loading-section" id="loadingSection" style="display: none;">
-        <div class="loading-card">
-          <div class="spinner-container">
-            <div class="spinner"></div>
-          </div>
-          <div class="loading-text">
-            <h3>Analyzing your image</h3>
-            <p>AI is detecting objects... <span id="progressDots">...</span></p>
-          </div>
-        </div>
-      </section>
+    <!-- Loading -->
+    <div id="loadingSection" class="loading-section hidden">
+      <div class="spinner"></div>
+      <p>Analyzing image with AI...</p>
+    </div>
 
-      <!-- Results -->
-      <section class="results-section" id="resultsSection" style="display: none;">
-        <div class="results-header">
-          <div class="detected-tags">
-            <h3>Detected <span id="tagCount">0</span> labels</h3>
-            <div class="tags-container" id="tagsGrid"></div>
-          </div>
-          <button class="new-search-btn" id="newSearchBtn">
-            <i class="material-icons">add</i> New Search
-          </button>
-        </div>
-        
-        <div class="products-grid" id="productsGrid"></div>
-        <div class="no-results" id="noResults" style="display: none;">
-          <i class="material-icons">search_off</i>
-          <h3>No products found</h3>
-          <p>Try a different image with clearer objects</p>
-          <button class="new-search-btn" id="noResultsBtn">Try Another Image</button>
-        </div>
-      </section>
+    <!-- Detected Labels -->
+    <section id="labelsSection" class="labels-section hidden">
+      <h2>Detected Objects</h2>
+      <div id="labelsContainer" class="labels-container"></div>
+    </section>
 
-      <!-- History Dashboard -->
-      <section class="history-section" id="historySection" style="display: none;">
-        <div class="history-header">
-          <h2>Search History</h2>
-          <button class="clear-history-btn" id="clearHistoryBtn">
-            <i class="material-icons">delete</i> Clear All
-          </button>
-        </div>
-        <div class="history-grid" id="historyGrid">
-          <div class="empty-history">
-            <i class="material-icons">history</i>
-            <h3>No searches yet</h3>
-            <p>Upload an image to get started</p>
-          </div>
-        </div>
-      </section>
-    </main>
+    <!-- Results -->
+    <section id="resultsSection" class="results-section hidden">
+      <h2>Matching Products</h2>
+      <div id="resultsGrid" class="results-grid"></div>
+    </section>
+
+    <!-- No Results -->
+    <div id="noResults" class="no-results hidden">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <h3>No matching products found</h3>
+      <p>Try uploading a different image with clearer objects.</p>
+    </div>
   </div>
 
   <script src="script.js"></script>
