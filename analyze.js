@@ -19,18 +19,19 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Parse multipart form data manually (no external libraries)
-    const chunks = [];
-    for await (const chunk of req) {
-      chunks.push(chunk);
+    // Parse JSON body (Vercel auto-parses JSON when Content-Type is application/json)
+    const body = req.body || {};
+    const imageDataUrl = body.image;
+
+    if (!imageDataUrl || typeof imageDataUrl !== 'string') {
+      return res.status(400).json({ error: 'No image provided. Expected base64 data URL.' });
     }
-    const buffer = Buffer.concat(chunks);
-    
-    // Extract image from multipart body
-    const imageBase64 = extractImageFromMultipart(buffer);
-    
-    if (!imageBase64) {
-      return res.status(400).json({ error: 'No image found in request' });
+
+    // Extract base64 content from data URL (remove "data:image/...;base64," prefix)
+    const base64Content = imageDataUrl.split(',')[1];
+
+    if (!base64Content) {
+      return res.status(400).json({ error: 'Invalid image format. Expected base64 data URL.' });
     }
 
     // Call Google Vision API
@@ -41,7 +42,7 @@ export default async function handler(req, res) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           requests: [{
-            image: { content: imageBase64 },
+            image: { content: base64Content },
             features: [{ type: 'LABEL_DETECTION', maxResults: 10 }]
           }]
         })
@@ -67,34 +68,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Server error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error', details: error.message });
   }
-}
-
-// Helper: Extract base64 image from multipart form data
-function extractImageFromMultipart(buffer) {
-  const bodyStr = buffer.toString('binary');
-  
-  // Find the content of the file (between headers and next boundary)
-  const contentStart = bodyStr.indexOf('\r\n\r\n');
-  if (contentStart === -1) return null;
-  
-  // Find the boundary
-  const boundaryMatch = bodyStr.match(/boundary=([^\s;]+)/);
-  if (!boundaryMatch) return null;
-  
-  const boundary = boundaryMatch[1].replace(/["']/g, '');
-  
-  // Find the end of the file content (before the next boundary)
-  const fileContentStart = contentStart + 4;
-  const nextBoundaryIndex = bodyStr.indexOf(`--${boundary}`, fileContentStart);
-  
-  if (nextBoundaryIndex === -1) return null;
-  
-  // Extract the binary image data
-  const fileContentEnd = nextBoundaryIndex - 2; // -2 for \r\n before boundary
-  const imageBuffer = buffer.slice(fileContentStart, fileContentEnd);
-  
-  // Convert to base64
-  return imageBuffer.toString('base64');
 }
