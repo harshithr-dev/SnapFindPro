@@ -3,51 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SnapFind Pro - AI Image Search</title>
+  <title>SnapFind Pro - AI Visual Search</title>
   <link rel="stylesheet" href="style.css">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1><i class="fas fa-camera"></i> SnapFind Pro</h1>
-      <p>Upload an image, find matching products instantly</p>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo">
+          <i class="material-icons">visibility</i>
+          <span>SnapFind Pro</span>
+        </div>
+        <div class="header-actions">
+          <button class="history-btn" id="historyBtn">
+            <i class="material-icons">history</i>
+            <span>History</span>
+          </button>
+        </div>
+      </div>
     </header>
 
-    <main>
+    <!-- Main Content -->
+    <main class="main">
       <!-- Upload Section -->
-      <section class="upload-section">
-        <div class="upload-area" id="uploadArea">
-          <i class="fas fa-cloud-upload-alt"></i>
-          <p>Drag & drop your image here or click to browse</p>
-          <input type="file" id="imageInput" accept="image/*" hidden>
-        </div>
-        <div class="preview-container" id="previewContainer" style="display: none;">
-          <img id="previewImage" alt="Preview">
-          <button class="search-btn" id="searchBtn">
-            <i class="fas fa-search"></i> Find Products
-          </button>
+      <section class="upload-section active" id="uploadSection">
+        <div class="upload-card">
+          <div class="upload-area" id="uploadArea">
+            <i class="material-icons">cloud_upload</i>
+            <div class="upload-text">
+              <h2>Search with your image</h2>
+              <p>Drag & drop or click to upload</p>
+            </div>
+            <input type="file" id="imageInput" accept="image/*" hidden>
+          </div>
+          
+          <div class="preview-container" id="previewContainer" style="display: none;">
+            <img id="previewImage" alt="Preview">
+            <div class="preview-actions">
+              <button class="search-btn primary" id="searchBtn">
+                <i class="material-icons">search</i>
+                <span>Find Products</span>
+              </button>
+              <button class="clear-btn" id="clearBtn">
+                <i class="material-icons">close</i>
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
-      <!-- Loading Spinner -->
-      <div class="loading" id="loading" style="display: none;">
-        <div class="spinner"></div>
-        <p>Analyzing image with AI...</p>
-      </div>
+      <!-- Loading -->
+      <section class="loading-section" id="loadingSection" style="display: none;">
+        <div class="loading-card">
+          <div class="spinner-container">
+            <div class="spinner"></div>
+          </div>
+          <div class="loading-text">
+            <h3>Analyzing your image</h3>
+            <p>AI is detecting objects... <span id="progressDots">...</span></p>
+          </div>
+        </div>
+      </section>
 
-      <!-- Results Section -->
+      <!-- Results -->
       <section class="results-section" id="resultsSection" style="display: none;">
-        <div class="detected-tags">
-          <h3><i class="fas fa-tags"></i> Detected Labels</h3>
-          <div class="tags-grid" id="tagsGrid"></div>
+        <div class="results-header">
+          <div class="detected-tags">
+            <h3>Detected <span id="tagCount">0</span> labels</h3>
+            <div class="tags-container" id="tagsGrid"></div>
+          </div>
+          <button class="new-search-btn" id="newSearchBtn">
+            <i class="material-icons">add</i> New Search
+          </button>
         </div>
         
-        <div class="products-grid" id="productsGrid">
-          <div class="no-results" id="noResults" style="display: none;">
-            <i class="fas fa-search"></i>
-            <h3>No products found</h3>
-            <p>Try uploading a different image</p>
+        <div class="products-grid" id="productsGrid"></div>
+        <div class="no-results" id="noResults" style="display: none;">
+          <i class="material-icons">search_off</i>
+          <h3>No products found</h3>
+          <p>Try a different image with clearer objects</p>
+          <button class="new-search-btn" id="noResultsBtn">Try Another Image</button>
+        </div>
+      </section>
+
+      <!-- History Dashboard -->
+      <section class="history-section" id="historySection" style="display: none;">
+        <div class="history-header">
+          <h2>Search History</h2>
+          <button class="clear-history-btn" id="clearHistoryBtn">
+            <i class="material-icons">delete</i> Clear All
+          </button>
+        </div>
+        <div class="history-grid" id="historyGrid">
+          <div class="empty-history">
+            <i class="material-icons">history</i>
+            <h3>No searches yet</h3>
+            <p>Upload an image to get started</p>
           </div>
         </div>
       </section>
