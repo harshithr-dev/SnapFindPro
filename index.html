@@ -1,85 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SnapFind Pro — AI Image Search</title>
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnapFind Pro | AI Image Search</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <!-- Header -->
-    <header class="header">
-      <div class="logo">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-          <circle cx="12" cy="13" r="4"></circle>
-        </svg>
-        <h1>SnapFind Pro</h1>
-      </div>
-      <p class="subtitle">Upload an image. Find matching products instantly.</p>
-    </header>
+    <div class="container">
+        <header>
+            <h1>SnapFind <span>Pro</span></h1>
+            <p>Upload a photo to find matching products instantly.</p>
+        </header>
 
-    <!-- Upload Section -->
-    <section class="upload-section">
-      <div class="upload-area" id="uploadArea">
-        <input type="file" id="fileInput" accept="image/*" hidden>
-        <div class="upload-placeholder" id="uploadPlaceholder">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" y1="3" x2="12" y2="15"></line>
-          </svg>
-          <p>Drag & drop an image or <span class="highlight">click to browse</span></p>
-          <span class="file-types">JPG, PNG, GIF up to 5MB</span>
-        </div>
-        <img id="imagePreview" class="image-preview hidden" alt="Preview">
-        <button id="removeImage" class="remove-image hidden" title="Remove image">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-      <button id="searchBtn" class="search-btn" disabled>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        Find Products
-      </button>
-    </section>
+        <main>
+            <div class="upload-section">
+                <input type="file" id="imageInput" accept="image/*" hidden>
+                <label for="imageInput" class="upload-btn">Choose Image</label>
+                <div id="previewContainer" class="hidden">
+                    <img id="imagePreview" src="" alt="Preview">
+                </div>
+                <button id="searchBtn" class="search-btn hidden">Analyze & Search</button>
+            </div>
 
-    <!-- Loading -->
-    <div id="loadingSection" class="loading-section hidden">
-      <div class="spinner"></div>
-      <p>Analyzing image with AI...</p>
+            <div id="loader" class="loader hidden"></div>
+
+            <div id="resultsSection" class="hidden">
+                <h3>Detected Labels:</h3>
+                <div id="tagsContainer" class="tags"></div>
+                
+                <h3>Matched Products:</h3>
+                <div id="productsGrid" class="grid"></div>
+            </div>
+        </main>
     </div>
-
-    <!-- Detected Labels -->
-    <section id="labelsSection" class="labels-section hidden">
-      <h2>Detected Objects</h2>
-      <div id="labelsContainer" class="labels-container"></div>
-    </section>
-
-    <!-- Results -->
-    <section id="resultsSection" class="results-section hidden">
-      <h2>Matching Products</h2>
-      <div id="resultsGrid" class="results-grid"></div>
-    </section>
-
-    <!-- No Results -->
-    <div id="noResults" class="no-results hidden">
-      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-      </svg>
-      <h3>No matching products found</h3>
-      <p>Try uploading a different image with clearer objects.</p>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
